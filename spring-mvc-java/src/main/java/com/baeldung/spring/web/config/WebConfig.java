@@ -3,9 +3,6 @@ package com.baeldung.spring.web.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -26,8 +23,9 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.util.UrlPathHelper;
 import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring4.view.ThymeleafViewResolver;
-import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
+import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import com.baeldung.excel.ExcelPOIHelper;
 
@@ -35,9 +33,6 @@ import com.baeldung.excel.ExcelPOIHelper;
 @Configuration
 @ComponentScan(basePackages = { "com.baeldung.web.controller" })
 public class WebConfig implements WebMvcConfigurer {
-
-	 @Autowired
-	    private ServletContext ctx;
 	
     @Override
     public void addViewControllers(final ViewControllerRegistry registry) {
@@ -64,11 +59,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Bean
     @Description("Thymeleaf template resolver serving HTML 5")
-    public ServletContextTemplateResolver templateResolver() {
-        final ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(ctx);
+    public ITemplateResolver templateResolver() {
+        final SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
         templateResolver.setPrefix("/WEB-INF/templates/");
         templateResolver.setSuffix(".html");
-        templateResolver.setTemplateMode("HTML5");
+        templateResolver.setTemplateMode("HTML");
         return templateResolver;
     }
 
@@ -91,15 +86,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
-    }
-    
-    @Bean(name = "multipartResolver")
-    public CommonsMultipartResolver multipartResolver() {
-
-        final CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-        multipartResolver.setMaxUploadSize(100000);
-
-        return multipartResolver;
     }
 
     @Override
@@ -135,5 +121,12 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public ExcelPOIHelper excelPOIHelper() {
         return new ExcelPOIHelper();
+    }
+    
+    @Bean(name = "multipartResolver")
+    public CommonsMultipartResolver multipartResolver() {
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        multipartResolver.setMaxUploadSize(100000);
+        return multipartResolver;
     }
 }
